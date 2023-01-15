@@ -28,9 +28,11 @@ using Volo.Abp.Modularity;
 using Volo.Abp.Swashbuckle;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.VirtualFileSystem;
+using Volo.Abp.OpenIddict;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Options;
 
 namespace Acme.BookStore;
-
 [DependsOn(
     typeof(BookStoreHttpApiModule),
     typeof(AbpAutofacModule),
@@ -55,6 +57,18 @@ public class BookStoreHttpApiHostModule : AbpModule
                 options.UseAspNetCore();
             });
         });
+
+        PreConfigure<AbpOpenIddictAspNetCoreOptions>(options =>
+        {
+            options.AddDevelopmentEncryptionAndSigningCertificate = false;
+        });
+
+        PreConfigure<OpenIddictServerBuilder>(builder =>
+        {
+            builder.AddEphemeralEncryptionKey();
+            builder.AddEphemeralSigningKey();
+            // In production, it is recommended to use two RSA certificates, one for encryption, one for signing.
+        });
     }
 
     public override void ConfigureServices(ServiceConfigurationContext context)
@@ -73,6 +87,22 @@ public class BookStoreHttpApiHostModule : AbpModule
 
     private void ConfigureAuthentication(ServiceConfigurationContext context)
     {
+        context.Services.AddAuthentication()
+            .AddFacebook(facebook =>
+            {
+                facebook.AppId = "...";
+                facebook.AppSecret = "...";
+                facebook.Scope.Add("email");
+                facebook.Scope.Add("public_profile");
+            })
+            .AddGoogle(google =>
+            {
+                google.ClientId = "...";
+                google.ClientSecret = "...";
+                google.Scope.Add("email");
+                google.Scope.Add("public_profile");
+            });
+
         context.Services.ForwardIdentityAuthenticationForBearer(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
     }
 
@@ -156,19 +186,19 @@ public class BookStoreHttpApiHostModule : AbpModule
         {
             options.AddDefaultPolicy(builder =>
                {
-                builder
-                    .WithOrigins(
-                        configuration["App:CorsOrigins"]
-                            .Split(",", StringSplitOptions.RemoveEmptyEntries)
-                            .Select(o => o.RemovePostFix("/"))
-                            .ToArray()
-                    )
-                    .WithAbpExposedHeaders()
-                    .SetIsOriginAllowedToAllowWildcardSubdomains()
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials();
-            });
+                   builder
+                       .WithOrigins(
+                           configuration["App:CorsOrigins"]
+                               .Split(",", StringSplitOptions.RemoveEmptyEntries)
+                               .Select(o => o.RemovePostFix("/"))
+                               .ToArray()
+                       )
+                       .WithAbpExposedHeaders()
+                       .SetIsOriginAllowedToAllowWildcardSubdomains()
+                       .AllowAnyHeader()
+                       .AllowAnyMethod()
+                       .AllowCredentials();
+               });
         });
     }
 
