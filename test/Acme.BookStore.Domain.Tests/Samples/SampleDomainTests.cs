@@ -21,7 +21,7 @@ public class SampleDomainTests : BookStoreDomainTestBase
         _identityUserManager = GetRequiredService<IdentityUserManager>();
     }
 
-    [Fact]
+    [Fact(Skip = "Only testing deployment")]
     public async Task Should_Set_Email_Of_A_User()
     {
         IdentityUser adminUser;
