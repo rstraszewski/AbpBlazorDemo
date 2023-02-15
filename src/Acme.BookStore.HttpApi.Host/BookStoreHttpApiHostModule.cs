@@ -31,6 +31,8 @@ using Volo.Abp.VirtualFileSystem;
 using Volo.Abp.OpenIddict;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Options;
+using Autofac.Core;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace Acme.BookStore;
 [DependsOn(
@@ -83,6 +85,11 @@ public class BookStoreHttpApiHostModule : AbpModule
         ConfigureVirtualFileSystem(context);
         ConfigureCors(context, configuration);
         ConfigureSwaggerServices(context, configuration);
+
+        context.Services.AddAntiforgery(options =>
+        {
+            options.SuppressXFrameOptionsHeader = true;
+        });
     }
 
     private void ConfigureAuthentication(ServiceConfigurationContext context)
