@@ -217,11 +217,11 @@ public class BookStoreWebModule : AbpModule
         IWebHostEnvironment hostingEnvironment)
     {
         var dataProtectionBuilder = context.Services.AddDataProtection().SetApplicationName("BookStore");
-        if (!hostingEnvironment.IsDevelopment())
-        {
-            var redis = ConnectionMultiplexer.Connect(configuration["Redis:Configuration"]);
-            dataProtectionBuilder.PersistKeysToStackExchangeRedis(redis, "BookStore-Protection-Keys");
-        }
+        //if (!hostingEnvironment.IsDevelopment())
+        //{
+        //    var redis = ConnectionMultiplexer.Connect(configuration["Redis:Configuration"]);
+        //    dataProtectionBuilder.PersistKeysToStackExchangeRedis(redis, "BookStore-Protection-Keys");
+        //}
     }
     
     private void ConfigureDistributedLocking(

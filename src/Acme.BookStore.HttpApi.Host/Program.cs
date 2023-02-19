@@ -8,7 +8,7 @@ using Serilog.Events;
 
 namespace Acme.BookStore;
 
-public class Program
+public partial class Program
 {
     public async static Task<int> Main(string[] args)
     {
@@ -17,6 +17,7 @@ public class Program
             .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
             .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
             .Enrich.FromLogContext()
+            .Enrich.WithCaller()
             .WriteTo.Async(c => c.File("Logs/logs.txt"))
             .WriteTo.Async(c => c.Console())
             .CreateLogger();
